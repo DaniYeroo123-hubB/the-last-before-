@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { WorldClock, Theme } from '../types';
-import { Search, Compass, Plus, Trash2, Sun, Moon, Clock, Globe, MapPin } from 'lucide-react';
+import { Search, Compass, Plus, Trash2, Sun, Moon, Clock, Globe, MapPin, Star } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import haptics from '../utils/haptics';
 import synth from '../utils/synth';
 import { useDateTimeSettings } from '../utils/settingsContext';
-import { WORLD_CITIES } from '../utils/timezoneDb';
+import { WORLD_CITIES, getDSTDetails } from '../utils/timezoneDb';
+import { getSpringTransition, getButtonMotion } from '../utils/motion';
 
 interface WorldClockTabProps {
   clocks: WorldClock[];
@@ -86,6 +87,45 @@ export default function WorldClockTab({
   const [time, setTime] = useState(getAppTime());
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isFocused, setIsFocused] = useState(false);
+  const [sortBy, setSortBy] = useState<'pin' | 'name' | 'offset-asc' | 'offset-desc'>('pin');
+
+  const getTimezoneOffsetMinutes = (timezone: string): number => {
+    try {
+      const tzString = time.toLocaleString('en-US', { timeZone: timezone });
+      const utcString = time.toLocaleString('en-US', { timeZone: 'UTC' });
+      const tzTime = new Date(tzString).getTime();
+      const utcTime = new Date(utcString).getTime();
+      return Math.round((tzTime - utcTime) / 60000);
+    } catch (e) {
+      return 0;
+    }
+  };
+
+  const sortedClocks = [...clocks].sort((a, b) => {
+    // Pin / default city sorting
+    if (sortBy === 'pin') {
+      if (settings.worldClockDefaultCity === a.timezone) return -1;
+      if (settings.worldClockDefaultCity === b.timezone) return 1;
+      return 0;
+    }
+
+    // Name sorting
+    if (sortBy === 'name') {
+      return a.cityName.localeCompare(b.cityName);
+    }
+
+    // Offset sorting
+    if (sortBy === 'offset-asc' || sortBy === 'offset-desc') {
+      const offsetA = getTimezoneOffsetMinutes(a.timezone);
+      const offsetB = getTimezoneOffsetMinutes(b.timezone);
+      if (offsetA !== offsetB) {
+        return sortBy === 'offset-asc' ? offsetA - offsetB : offsetB - offsetA;
+      }
+      return a.cityName.localeCompare(b.cityName);
+    }
+
+    return 0;
+  });
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -165,11 +205,16 @@ export default function WorldClockTab({
       if (diffHrs > 0) offsetLabel = `+${diffHrs} hrs ahead`;
       if (diffHrs < 0) offsetLabel = `${diffHrs} hrs behind`;
 
+      const dst = getDSTDetails(timezone, time);
+
       return {
         timeParts: formatted,
         dateStr: dateString,
         isNight,
         offsetLabel,
+        abbreviation: dst.abbreviation,
+        hasDST: dst.hasDST,
+        isDSTNow: dst.isDSTNow,
       };
     } catch (e) {
       return {
@@ -177,6 +222,9 @@ export default function WorldClockTab({
         dateStr: 'Unknown Date',
         isNight: false,
         offsetLabel: 'Unknown offset',
+        abbreviation: 'GMT',
+        hasDST: false,
+        isDSTNow: false,
       };
     }
   };
@@ -200,7 +248,7 @@ export default function WorldClockTab({
     <div className="w-full max-w-2xl mx-auto space-y-6" id="world-clock-tab-wrapper">
       {/* Search Header Panel */}
       <div className={`relative z-50 p-5 rounded-2xl ${theme.cardBg} border ${theme.border} space-y-4`} id="world-clock-header">
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h2 className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
               <Compass className={`w-5 h-5 text-${theme.primary}`} /> Global Time Zones
@@ -208,6 +256,25 @@ export default function WorldClockTab({
             <p className="text-xs text-slate-400 mt-1">
               Add cities below to monitor real-time business offsets and timezones worldwide.
             </p>
+          </div>
+
+          <div className="flex items-center gap-2 self-start sm:self-center" id="world-clock-sorting-controls">
+            <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Sort by</span>
+            <select
+              value={sortBy}
+              onChange={(e) => {
+                if (settings.clickSoundsEnabled) synth.playClick();
+                if (settings.hapticsEnabled) haptics.light();
+                setSortBy(e.target.value as any);
+              }}
+              className="bg-slate-950 border border-slate-800 text-xs text-slate-300 font-semibold py-1.5 px-3 rounded-lg focus:outline-none focus:border-cyan-500 cursor-pointer"
+              id="world-clock-sort-select"
+            >
+              <option value="pin">Default / Pinned First</option>
+              <option value="name">City Name (A-Z)</option>
+              <option value="offset-asc">Time Offset (West to East)</option>
+              <option value="offset-desc">Time Offset (East to West)</option>
+            </select>
           </div>
         </div>
 
@@ -380,22 +447,23 @@ export default function WorldClockTab({
             </div>
           </div>
         ) : (
-          [...clocks].sort((a, b) => {
-            if (settings.worldClockDefaultCity) {
-              if (a.timezone === settings.worldClockDefaultCity) return -1;
-              if (b.timezone === settings.worldClockDefaultCity) return 1;
-            }
-            return 0;
-          }).map((clock) => {
+          sortedClocks.map((clock) => {
             const details = getCityTimeDetails(clock.timezone);
             const isActive = activeTimezone === clock.timezone;
+            const isPinned = settings.worldClockDefaultCity === clock.timezone;
             return (
               <motion.div
                 key={clock.id}
                 layout
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ type: 'spring', stiffness: 350, damping: 25 }}
+                whileHover={
+                  settings.animationIntensity === 'minimal' ? { scale: 1.005 } :
+                  settings.animationIntensity === 'balanced' ? { scale: 1.012, y: -2 } :
+                  settings.animationIntensity === 'supreme' ? { scale: 1.022, y: -4, border: `1px solid var(--color-cyan-500, rgba(6, 182, 212, 0.35))`, boxShadow: "0 15px 30px -10px rgba(0,0,0,0.5)" } :
+                  { scale: 1.03, y: -6, border: `1px solid var(--color-cyan-500, rgba(6, 182, 212, 0.45))`, boxShadow: "0 25px 45px -12px rgba(0,0,0,0.6)" }
+                }
+                transition={getSpringTransition(settings.animationIntensity)}
                 onClick={(e) => {
                   if ((e.target as HTMLElement).closest('button')) return;
                   haptics.success();
@@ -403,12 +471,12 @@ export default function WorldClockTab({
                   updateSetting('isAutoTimezone', false);
                   updateSetting('manualTimezone', clock.timezone);
                 }}
-                className={`p-5 rounded-xl border relative overflow-hidden group transition-all duration-300 cursor-pointer ${
+                className={`p-5 rounded-xl border relative overflow-hidden group cursor-pointer ${
                   isActive
                     ? `${getThemeBorderClass(theme.id)} border-2 ring bg-slate-900/95 shadow-lg`
                     : details.isNight
-                    ? 'bg-slate-950/90 border-slate-900/60 shadow-[inset_0_0_12px_rgba(255,255,255,0.02)] hover:border-slate-800'
-                    : 'bg-slate-900/40 border-slate-800/60 hover:border-slate-700'
+                    ? 'bg-slate-950/90 border-slate-900/60 shadow-[inset_0_0_12px_rgba(255,255,255,0.02)]'
+                    : 'bg-slate-900/40 border-slate-800/60'
                 }`}
                 id={`clock-card-${clock.id}`}
                 title={`Click to set entire app system timezone to ${clock.cityName}`}
@@ -436,23 +504,43 @@ export default function WorldClockTab({
                       )}
                     </h3>
                     <p className="text-[10px] text-slate-500 font-semibold tracking-wider uppercase mt-0.5">
-                      {clock.timezone.split('/')[0]} / {clock.timezone.split('/')[1]?.replace('_', ' ')}
+                      {clock.timezone.split('/')[0]} / {clock.timezone.split('/')[1]?.replace('_', ' ')} • {details.abbreviation} {details.hasDST ? (details.isDSTNow ? '• DST' : '• Std') : ''}
                     </p>
                   </div>
 
-                  {/* Delete Button */}
-                  <button
-                    onClick={() => {
-                      haptics.heavy();
-                      synth.playDelete();
-                      onDeleteClock(clock.id);
-                    }}
-                    className="p-1.5 rounded bg-slate-950 border border-slate-900/50 text-slate-500 hover:text-red-400 hover:border-red-950/40 hover:bg-red-950/20 active:scale-90 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"
-                    title={`Delete ${clock.cityName}`}
-                    id={`delete-clock-btn-${clock.cityName}`}
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
+                  <div className="flex items-center gap-1.5">
+                    {/* Favorite / Pin Button */}
+                    <button
+                      onClick={() => {
+                        haptics.medium();
+                        synth.playClick();
+                        updateSetting('worldClockDefaultCity', isPinned ? '' : clock.timezone);
+                      }}
+                      className={`p-1.5 rounded bg-slate-950 border transition-all ${
+                        isPinned
+                          ? 'text-yellow-400 border-yellow-500/40 bg-yellow-950/20 shadow-[0_0_8px_rgba(234,179,8,0.25)] scale-110'
+                          : 'text-slate-500 border-slate-900/50 hover:text-yellow-400 hover:border-yellow-950/40 opacity-0 group-hover:opacity-100 focus:opacity-100'
+                      }`}
+                      title={isPinned ? "Unpin default city" : "Pin as default city"}
+                      id={`pin-clock-btn-${clock.cityName}`}
+                    >
+                      <Star className={`w-3.5 h-3.5 ${isPinned ? 'fill-yellow-400' : ''}`} />
+                    </button>
+
+                    {/* Delete Button */}
+                    <button
+                      onClick={() => {
+                        haptics.heavy();
+                        synth.playDelete();
+                        onDeleteClock(clock.id);
+                      }}
+                      className="p-1.5 rounded bg-slate-950 border border-slate-900/50 text-slate-500 hover:text-red-400 hover:border-red-950/40 hover:bg-red-950/20 active:scale-90 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"
+                      title={`Delete ${clock.cityName}`}
+                      id={`delete-clock-btn-${clock.cityName}`}
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
 
                 <div className="mt-5 flex justify-between items-end">

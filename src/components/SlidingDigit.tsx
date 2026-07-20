@@ -1,5 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { useDateTimeSettings } from '../utils/settingsContext';
+import { SPRING_PRESETS } from '../utils/motion';
 
 interface SlidingDigitProps {
   key?: React.Key;
@@ -17,6 +19,9 @@ export default function SlidingDigit({
   className = '',
   width = '0.62em',
 }: SlidingDigitProps) {
+  const { settings } = useDateTimeSettings();
+  const springPreset = SPRING_PRESETS[settings.animationIntensity] || SPRING_PRESETS.supreme;
+
   return (
     <span
       className={`relative inline-flex overflow-hidden ${className}`}
@@ -30,9 +35,7 @@ export default function SlidingDigit({
           exit={{ y: '-100%', opacity: 0 }}
           transition={{
             type: 'spring',
-            stiffness: 420,
-            damping: 34,
-            mass: 0.5,
+            ...springPreset,
           }}
           className="absolute inset-0 flex items-center justify-center select-none"
         >

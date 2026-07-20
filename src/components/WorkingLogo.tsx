@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Theme } from '../types';
 import { getThemeClasses } from '../utils/themes';
 import { useSharedClock } from '../utils/clockEngine';
+import { useDateTimeSettings } from '../utils/settingsContext';
 import { motion } from 'motion/react';
 import { drawBezelPath, drawDialPath, drawSpecialComplications } from '../utils/clockStyles';
 
@@ -23,6 +24,7 @@ export default function WorkingLogo({
   clockStyle,
 }: WorkingLogoProps) {
   const time = useSharedClock();
+  const { settings } = useDateTimeSettings();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   // Get active style (prop or localStorage fallback, defaults to celestial-orbit)
@@ -163,8 +165,22 @@ export default function WorkingLogo({
       const targetHourAngle = (((hrs % 12) + (mins + (secs + ms / 1000) / 60) / 60) / 12) * Math.PI * 2;
 
       // Calculate spring physics for hands (to model physical inertia and settling vibration)
-      const springTension = 130;
-      const damping = 15;
+      let springTension = 130;
+      let damping = 15;
+
+      if (settings.animationIntensity === 'minimal') {
+        springTension = 400;
+        damping = 40; // Extremely rigid, near-zero overshoot
+      } else if (settings.animationIntensity === 'balanced') {
+        springTension = 150;
+        damping = 18; // Clean, standard responsive damping
+      } else if (settings.animationIntensity === 'supreme') {
+        springTension = 320;
+        damping = 14; // High tension with a micro-vibrational settle on ticks (like high-end escape mechanisms)
+      } else if (settings.animationIntensity === 'cinematic') {
+        springTension = 45;
+        damping = 8.5; // Slow, luxurious, momentum-heavy sweeping glide
+      }
 
       // Handle angular wrap-around gently
       const processAnglePhysics = (target: number, current: number, velocity: React.MutableRefObject<number>) => {
@@ -429,7 +445,7 @@ export default function WorkingLogo({
         ctx.restore();
       }
 
-      // 4. SOLAR WEATHER/TIME RESPONSIVE LIGHTING OVERLAY (Tints clock based on hour of day)
+      // 4. SOLAR TIME RESPONSIVE LIGHTING OVERLAY (Tints clock based on hour of day)
       if (activeRealtimeLighting) {
         ctx.save();
         drawDialPath(ctx, center, dialRadius, activeStyle);

@@ -3,6 +3,8 @@ import { Lap, Theme } from '../types';
 import { Play, Pause, RotateCcw, Flag, Timer } from 'lucide-react';
 import { synth } from '../utils/synth';
 import haptics from '../utils/haptics';
+import { useDateTimeSettings } from '../utils/settingsContext';
+import { getSpringTransition, getButtonMotion } from '../utils/motion';
 import { motion } from 'motion/react';
 
 interface StopwatchTabProps {
@@ -12,6 +14,7 @@ interface StopwatchTabProps {
 }
 
 export default function StopwatchTab({ theme, onStartStopwatch, onLapRecorded }: StopwatchTabProps) {
+  const { settings } = useDateTimeSettings();
   const [isRunning, setIsRunning] = useState(false);
   const [time, setTime] = useState(0); // in milliseconds
   const [laps, setLaps] = useState<Lap[]>([]);
@@ -195,10 +198,12 @@ export default function StopwatchTab({ theme, onStartStopwatch, onLapRecorded }:
         {/* Stopwatch Buttons */}
         <div className="flex justify-center items-center gap-6 mt-8" id="stopwatch-controls">
           {/* Reset / Lap Button */}
-          <button
+          <motion.button
             onClick={isRunning ? handleLap : handleReset}
             disabled={time === 0}
-            className={`w-14 h-14 rounded-full border border-slate-800 flex items-center justify-center transition-all bg-slate-950 text-slate-400 active:scale-90 hover:border-slate-700 disabled:opacity-40 disabled:scale-100 disabled:pointer-events-none`}
+            {...getButtonMotion(settings.animationIntensity)}
+            transition={getSpringTransition(settings.animationIntensity)}
+            className={`w-14 h-14 rounded-full border border-slate-850 flex items-center justify-center bg-slate-950 text-slate-400 hover:border-slate-700 disabled:opacity-40 disabled:scale-100 disabled:pointer-events-none cursor-pointer shadow-md`}
             title={isRunning ? 'Record Lap' : 'Reset Stopwatch'}
             id="stopwatch-alt-btn"
           >
@@ -207,12 +212,14 @@ export default function StopwatchTab({ theme, onStartStopwatch, onLapRecorded }:
             ) : (
               <RotateCcw className="w-5 h-5 text-slate-400" />
             )}
-          </button>
+          </motion.button>
 
           {/* Primary Play/Pause Button */}
-          <button
+          <motion.button
             onClick={handleStartPause}
-            className={`w-20 h-20 rounded-full flex items-center justify-center transition-all shadow-xl hover:brightness-110 active:scale-95 bg-gradient-to-tr ${theme.gradient} text-black font-extrabold`}
+            {...getButtonMotion(settings.animationIntensity)}
+            transition={getSpringTransition(settings.animationIntensity)}
+            className={`w-20 h-20 rounded-full flex items-center justify-center shadow-xl bg-gradient-to-tr ${theme.gradient} text-black font-extrabold cursor-pointer`}
             title={isRunning ? 'Pause Stopwatch' : 'Start Stopwatch'}
             id="stopwatch-play-btn"
           >
@@ -221,7 +228,7 @@ export default function StopwatchTab({ theme, onStartStopwatch, onLapRecorded }:
             ) : (
               <Play className="w-8 h-8 text-black fill-black ml-1" />
             )}
-          </button>
+          </motion.button>
         </div>
       </div>
 
@@ -252,7 +259,7 @@ export default function StopwatchTab({ theme, onStartStopwatch, onLapRecorded }:
                   initial={{ opacity: 0, y: -15, scale: 0.98 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ type: 'spring', stiffness: 400, damping: 28 }}
+                  transition={getSpringTransition(settings.animationIntensity)}
                   className={`p-3.5 rounded-xl border flex items-center justify-between text-xs transition-all ${
                     lap.isBest 
                       ? 'bg-emerald-950/20 border-emerald-900/40 shadow-inner' 

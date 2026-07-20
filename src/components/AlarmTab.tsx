@@ -11,6 +11,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import haptics from '../utils/haptics';
 import { useDateTimeSettings } from '../utils/settingsContext';
 import { BUILTIN_SOUNDS, synth } from '../utils/synth';
+import { getSpringTransition, getButtonMotion, getStaggerContainerVariants, getStaggerItemVariants } from '../utils/motion';
 import AlarmTimePicker from './AlarmTimePicker';
 
 const getOpaqueBgColor = (themeId: string) => {
@@ -105,7 +106,7 @@ export default function AlarmTab({
   onDeleteAlarm,
   theme,
 }: AlarmTabProps) {
-  const { getFormattedTime } = useDateTimeSettings();
+  const { settings, getFormattedTime } = useDateTimeSettings();
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingAlarmId, setEditingAlarmId] = useState<string | null>(null);
   
@@ -492,7 +493,7 @@ export default function AlarmTab({
           </p>
         </div>
         
-        <button
+        <motion.button
           onClick={() => {
             haptics.medium();
             synth.playClick();
@@ -504,11 +505,13 @@ export default function AlarmTab({
             
             setShowAddForm(true);
           }}
-          className={`flex items-center gap-1.5 px-4 py-2.5 rounded-2xl text-xs font-black bg-${theme.primary} text-slate-950 shadow-lg shadow-${theme.primary}/10 hover:opacity-90 active:scale-95 transition-all cursor-pointer`}
+          {...getButtonMotion(settings.animationIntensity)}
+          transition={getSpringTransition(settings.animationIntensity)}
+          className={`flex items-center gap-1.5 px-4 py-2.5 rounded-2xl text-xs font-black bg-${theme.primary} text-slate-950 shadow-lg shadow-${theme.primary}/10 cursor-pointer`}
           id="btn-add-alarm-trigger"
         >
           <Plus className="w-4 h-4 text-slate-950" /> Add Alarm
-        </button>
+        </motion.button>
       </div>
 
       {/* Add / Edit Alarm Form Panel - Rebuilt as a dedicated full-screen page with premium page transition inside a Portal */}
@@ -1075,10 +1078,16 @@ export default function AlarmTab({
                 layout
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ type: 'spring', stiffness: 350, damping: 25 }}
+                whileHover={
+                  settings.animationIntensity === 'minimal' ? { scale: 1.005 } :
+                  settings.animationIntensity === 'balanced' ? { scale: 1.012, y: -2 } :
+                  settings.animationIntensity === 'supreme' ? { scale: 1.022, y: -4, border: `1px solid var(--color-cyan-500, rgba(6, 182, 212, 0.35))`, boxShadow: "0 15px 30px -10px rgba(0,0,0,0.5)" } :
+                  { scale: 1.03, y: -6, border: `1px solid var(--color-cyan-500, rgba(6, 182, 212, 0.45))`, boxShadow: "0 25px 45px -12px rgba(0,0,0,0.6)" }
+                }
+                transition={getSpringTransition(settings.animationIntensity)}
                 className={`p-4 sm:p-5 rounded-2xl ${theme.cardBg} border ${
                   alarm.enabled ? `border-${theme.primary}/25` : theme.border
-                } hover:border-${theme.primary}/40 flex items-center justify-between group transition-all duration-300`}
+                } hover:border-${theme.primary}/40 flex items-center justify-between group cursor-pointer`}
                 id={`alarm-card-${alarm.id}`}
               >
                 {/* Alarm Information & Click To Edit */}

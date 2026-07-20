@@ -28,7 +28,7 @@ export interface AppSettings {
   hapticsEnabled: boolean;
   // Animation Settings
   animationsEnabled: boolean;
-  animationIntensity: 'subtle' | 'medium' | 'rich';
+  animationIntensity: 'minimal' | 'balanced' | 'supreme' | 'cinematic';
   // Live Background Settings
   liveBgEnabled: boolean;
   liveBgStyle: 'match-theme' | 'time-of-day' | 'aurora' | 'galaxy' | 'ocean' | 'midnight' | 'sunrise' | 'sunset' | 'neon-cyber' | 'gold' | 'forest' | 'rain' | 'snow' | 'minimal-gradient';
@@ -152,7 +152,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   hapticsEnabled: true,
   // Animation Settings
   animationsEnabled: true,
-  animationIntensity: 'rich',
+  animationIntensity: 'supreme',
   // Live Background Settings
   liveBgEnabled: true,
   liveBgStyle: 'match-theme',

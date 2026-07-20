@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Theme } from '../types';
 import { Play, Pause, RotateCcw, Hourglass, Bell, Star } from 'lucide-react';
 import { synth } from '../utils/synth';
+import { useDateTimeSettings } from '../utils/settingsContext';
+import { getSpringTransition, getButtonMotion } from '../utils/motion';
 import { motion, AnimatePresence } from 'motion/react';
 import haptics from '../utils/haptics';
 
@@ -22,6 +24,7 @@ const PRESETS = [
 ];
 
 export default function TimerTab({ theme, onTimerCompleted }: TimerTabProps) {
+  const { settings } = useDateTimeSettings();
   // Input Selection
   const [hours, setHours] = useState(0);
   const [minutes, setMinutes] = useState(5);
@@ -211,19 +214,23 @@ export default function TimerTab({ theme, onTimerCompleted }: TimerTabProps) {
           {/* Action Buttons */}
           <div className="flex justify-center items-center gap-6 mt-8" id="timer-active-controls">
             {/* Cancel Button */}
-            <button
+            <motion.button
               onClick={handleCancel}
-              className="w-14 h-14 rounded-full border border-slate-800 flex items-center justify-center transition-all bg-slate-950 text-slate-400 active:scale-90 hover:border-slate-700"
+              {...getButtonMotion(settings.animationIntensity)}
+              transition={getSpringTransition(settings.animationIntensity)}
+              className="w-14 h-14 rounded-full border border-slate-850 flex items-center justify-center bg-slate-950 text-slate-400 cursor-pointer shadow-md"
               title="Cancel Timer"
               id="timer-cancel-btn"
             >
               <RotateCcw className="w-5 h-5 text-slate-400" />
-            </button>
+            </motion.button>
 
             {/* Play/Pause Button */}
-            <button
+            <motion.button
               onClick={handlePauseResume}
-              className={`w-18 h-18 rounded-full flex items-center justify-center transition-all shadow-xl hover:brightness-110 active:scale-95 bg-gradient-to-tr ${theme.gradient} text-black`}
+              {...getButtonMotion(settings.animationIntensity)}
+              transition={getSpringTransition(settings.animationIntensity)}
+              className={`w-18 h-18 rounded-full flex items-center justify-center shadow-xl bg-gradient-to-tr ${theme.gradient} text-black cursor-pointer`}
               title={isRunning ? 'Pause Timer' : 'Resume Timer'}
               id="timer-play-pause-btn"
             >
@@ -232,7 +239,7 @@ export default function TimerTab({ theme, onTimerCompleted }: TimerTabProps) {
               ) : (
                 <Play className="w-7 h-7 text-black fill-black ml-1" />
               )}
-            </button>
+            </motion.button>
           </div>
         </div>
       ) : (

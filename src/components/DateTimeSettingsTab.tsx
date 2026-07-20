@@ -661,11 +661,12 @@ export default function DateTimeSettingsTab({
                 <div className={`space-y-3 pt-1 transition-all ${settings.animationsEnabled ? 'opacity-100' : 'opacity-40 pointer-events-none'}`}>
                   <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Motion profiles & damping</label>
                   
-                  <div className="grid grid-cols-3 gap-2" id="animation-intensity-pills">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2" id="animation-intensity-pills">
                     {[
-                      { id: 'subtle', title: 'Subtle', desc: 'Short fades only' },
-                      { id: 'medium', title: 'Balanced', desc: 'Responsive springs' },
-                      { id: 'rich', title: 'Lush Cinematic', desc: 'Full spring cascades' },
+                      { id: 'minimal', title: 'Minimal', desc: 'Short fades only' },
+                      { id: 'balanced', title: 'Balanced', desc: 'Responsive springs' },
+                      { id: 'supreme', title: 'Supreme', desc: 'High physical snap' },
+                      { id: 'cinematic', title: 'Cinematic', desc: 'Slow dramatic sweep' },
                     ].map((opt) => {
                       const isActive = settings.animationIntensity === opt.id;
                       return (
@@ -1254,7 +1255,7 @@ export default function DateTimeSettingsTab({
                 <div className="border-t border-slate-900/60 pt-4 grid grid-cols-2 gap-4 text-left max-w-md mx-auto">
                   <div>
                     <span className="text-[9px] uppercase font-semibold text-slate-500 block">Engineering Team</span>
-                    <span className="text-xs font-bold text-slate-300">Melkeserba123-hubbbB</span>
+                    <span className="text-xs font-bold text-slate-300">Daniel and Yerosen Team</span>
                   </div>
                   <div>
                     <span className="text-[9px] uppercase font-semibold text-slate-500 block">Deploy Runtime</span>

@@ -13,9 +13,11 @@ import AboutTab from './components/AboutTab';
 import DateTimeSettingsTab from './components/DateTimeSettingsTab';
 import { useDateTimeSettings } from './utils/settingsContext';
 import { Bell, Timer as StopwatchIcon, Hourglass, Settings, Moon, Sun, ShieldAlert, Sparkles, Settings2, Activity, Clock as ClockIcon, CloudRain, Snowflake, Cloud, EyeOff } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, useMotionValue, useSpring } from 'motion/react';
 import haptics from './utils/haptics';
 import synth from './utils/synth';
+import { getPageVariants, getSpringTransition } from './utils/motion';
+import DockButton from './components/DockButton';
 
 const DEFAULT_ALARMS: Alarm[] = [
   {
@@ -52,6 +54,33 @@ export default function App() {
   } = useDateTimeSettings();
 
   const [activeTab, setActiveTab] = useState<'home' | 'alarm' | 'clock' | 'stopwatch' | 'timer' | 'about' | 'settings'>('home');
+
+  // Bottom dock area pointer tracking variables and motion springs
+  const dockRef = useRef<HTMLElement>(null);
+  const dockX = useMotionValue(0);
+  const dockY = useMotionValue(0);
+  const dockOpacityValue = useMotionValue(0);
+
+  const dockGlowX = useSpring(dockX, { damping: 25, stiffness: 250 });
+  const dockGlowY = useSpring(dockY, { damping: 25, stiffness: 250 });
+  const dockOpacity = useSpring(dockOpacityValue, { damping: 20, stiffness: 200 });
+
+  const handleDockMouseMove = (e: React.MouseEvent<HTMLElement>) => {
+    if (!dockRef.current) return;
+    const rect = dockRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    dockX.set(x);
+    dockY.set(y);
+  };
+
+  const handleDockMouseEnter = () => {
+    dockOpacityValue.set(0.18);
+  };
+
+  const handleDockMouseLeave = () => {
+    dockOpacityValue.set(0);
+  };
   const [clockStyle, setClockStyle] = useState<'digital' | 'minimal-word' | 'binary' | 'futuristic'>(() => {
     const stored = localStorage.getItem('dy_clock_style');
     if (stored && ['digital', 'minimal-word', 'binary', 'futuristic'].includes(stored)) {
@@ -375,12 +404,20 @@ export default function App() {
 
   const handleSnoozeAlarm = () => {
     if (triggeredAlarm) {
-      // Calculate snooze time 9 minutes in the future
-      const now = new Date();
-      now.setMinutes(now.getMinutes() + 9);
-      const hrsStr = String(now.getHours()).padStart(2, '0');
-      const minsStr = String(now.getMinutes()).padStart(2, '0');
-      const snoozedTime = `${hrsStr}:${minsStr}`;
+      // Calculate snooze time 9 minutes in the future, respecting active manual/auto settings
+      const snoozeTimeObj = new Date(getAppTime().getTime() + 9 * 60 * 1000);
+      
+      const formatter = new Intl.DateTimeFormat('en-US', {
+        timeZone: activeTimezone,
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      });
+      
+      const parts = formatter.formatToParts(snoozeTimeObj);
+      const hrsVal = parts.find(p => p.type === 'hour')?.value || '00';
+      const minsVal = parts.find(p => p.type === 'minute')?.value || '00';
+      const snoozedTime = `${hrsVal}:${minsVal}`;
       
       const snoozedAlarm: Alarm = {
         id: `snooze-${Date.now()}`,
@@ -668,10 +705,11 @@ export default function App() {
           {activeTab === 'home' && (
             <motion.div
               key="home-tab"
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              transition={{ type: 'spring', stiffness: 240, damping: 28, mass: 0.85 }}
+              variants={getPageVariants(settings.animationIntensity)}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={getSpringTransition(settings.animationIntensity)}
               className="space-y-6 flex flex-col items-center justify-center pt-2"
               id="home-view-container"
             >
@@ -735,10 +773,11 @@ export default function App() {
           {activeTab === 'alarm' && (
             <motion.div
               key="alarm-tab"
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              transition={{ type: 'spring', stiffness: 240, damping: 28, mass: 0.85 }}
+              variants={getPageVariants(settings.animationIntensity)}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={getSpringTransition(settings.animationIntensity)}
               id="alarm-tab-container"
             >
               <AlarmTab
@@ -756,10 +795,11 @@ export default function App() {
           {activeTab === 'clock' && (
             <motion.div
               key="clock-tab"
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              transition={{ type: 'spring', stiffness: 240, damping: 28, mass: 0.85 }}
+              variants={getPageVariants(settings.animationIntensity)}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={getSpringTransition(settings.animationIntensity)}
               id="clock-tab-container"
             >
               <WorldClockTab
@@ -775,10 +815,11 @@ export default function App() {
           {activeTab === 'stopwatch' && (
             <motion.div
               key="stopwatch-tab"
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              transition={{ type: 'spring', stiffness: 240, damping: 28, mass: 0.85 }}
+              variants={getPageVariants(settings.animationIntensity)}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={getSpringTransition(settings.animationIntensity)}
               id="stopwatch-tab-container"
             >
               <StopwatchTab 
@@ -791,10 +832,11 @@ export default function App() {
           {activeTab === 'timer' && (
             <motion.div
               key="timer-tab"
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              transition={{ type: 'spring', stiffness: 240, damping: 28, mass: 0.85 }}
+              variants={getPageVariants(settings.animationIntensity)}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={getSpringTransition(settings.animationIntensity)}
               id="timer-tab-container"
             >
               <TimerTab 
@@ -807,10 +849,11 @@ export default function App() {
           {activeTab === 'about' && (
             <motion.div
               key="about-tab"
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              transition={{ type: 'spring', stiffness: 240, damping: 28, mass: 0.85 }}
+              variants={getPageVariants(settings.animationIntensity)}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={getSpringTransition(settings.animationIntensity)}
               id="about-tab-container"
             >
               <AboutTab theme={currentTheme} />
@@ -821,10 +864,11 @@ export default function App() {
           {activeTab === 'settings' && (
             <motion.div
               key="settings-tab"
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              transition={{ type: 'spring', stiffness: 240, damping: 28, mass: 0.85 }}
+              variants={getPageVariants(settings.animationIntensity)}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={getSpringTransition(settings.animationIntensity)}
               id="settings-tab-container"
             >
               <DateTimeSettingsTab
@@ -846,234 +890,82 @@ export default function App() {
       </main>
 
       {/* Persistent Bottom Floating Navigation Dock */}
-      <nav 
-        className="fixed bottom-6 inset-x-6 max-w-2xl mx-auto p-1.5 rounded-2xl bg-slate-900/80 backdrop-blur-xl border border-slate-800/80 flex justify-between items-center shadow-2xl z-40 animate-fadeIn"
+      <motion.nav 
+        ref={dockRef}
+        onMouseMove={handleDockMouseMove}
+        onMouseEnter={handleDockMouseEnter}
+        onMouseLeave={handleDockMouseLeave}
+        className="fixed bottom-6 inset-x-6 max-w-2xl mx-auto p-1.5 rounded-2xl bg-slate-900/80 backdrop-blur-xl border border-slate-800/80 flex justify-between items-center shadow-2xl z-40 overflow-hidden"
         id="dy-dock-navigator"
       >
-        <motion.button
-          initial="rest"
-          whileHover="hover"
-          whileTap="tap"
+        {/* Subtle background glow following pointer */}
+        <motion.div
+          style={{
+            x: dockGlowX,
+            y: dockGlowY,
+            opacity: dockOpacity,
+            translateX: '-50%',
+            translateY: '-50%',
+          }}
+          className={`absolute pointer-events-none w-56 h-56 rounded-full bg-gradient-to-tr ${currentTheme.gradient} blur-3xl -z-10`}
+        />
+
+        <DockButton
+          isActive={activeTab === 'home'}
           onClick={() => handleTabChange('home')}
-          className={`relative flex-1 flex flex-col items-center justify-center py-2.5 rounded-xl transition-all gap-1 cursor-pointer z-10 ${
-            activeTab === 'home'
-              ? 'text-slate-950 font-bold'
-              : 'text-slate-400 hover:text-white'
-          }`}
+          label="Home"
+          intensity={settings.animationIntensity}
           id="dock-home-btn"
-        >
-          {activeTab === 'home' && (
-            <motion.div
-              layoutId="activeTabBackground"
-              className="absolute inset-0 bg-slate-100 rounded-xl -z-10"
-              transition={{ type: 'spring', stiffness: 300, damping: 25, mass: 0.7 }}
-            />
-          )}
-          <motion.div
-            variants={{
-              rest: { scale: 1, filter: 'drop-shadow(0 0 0px rgba(0, 0, 0, 0))' },
-              hover: { 
-                scale: 1.15, 
-                filter: activeTab === 'home' 
-                  ? 'drop-shadow(0 0 4px rgba(0, 0, 0, 0.15))' 
-                  : 'drop-shadow(0 0 8px rgba(255, 255, 255, 0.45))'
-              }
-            }}
-            transition={{ type: 'spring', stiffness: 350, damping: 15 }}
-            className="relative flex items-center justify-center"
-          >
-            {/* Embedded Mini-working-logo representation inside nav home button! */}
+          icon={
             <div className={`w-5 h-5 rounded bg-gradient-to-tr ${currentTheme.gradient} p-0.5 flex items-center justify-center text-[7px] font-black text-slate-950`} />
-          </motion.div>
-          <span className="text-[10px] font-bold">Home</span>
-        </motion.button>
- 
-        <motion.button
-          initial="rest"
-          whileHover="hover"
-          whileTap="tap"
+          }
+        />
+
+        <DockButton
+          isActive={activeTab === 'alarm'}
           onClick={() => handleTabChange('alarm')}
-          className={`relative flex-1 flex flex-col items-center justify-center py-2.5 rounded-xl transition-all gap-1 cursor-pointer z-10 ${
-            activeTab === 'alarm'
-              ? 'text-slate-950 font-bold'
-              : 'text-slate-400 hover:text-white'
-          }`}
+          label="Alarms"
+          intensity={settings.animationIntensity}
           id="dock-alarm-btn"
-        >
-          {activeTab === 'alarm' && (
-            <motion.div
-              layoutId="activeTabBackground"
-              className="absolute inset-0 bg-slate-100 rounded-xl -z-10"
-              transition={{ type: 'spring', stiffness: 300, damping: 25, mass: 0.7 }}
-            />
-          )}
-          <motion.div
-            variants={{
-              rest: { scale: 1, filter: 'drop-shadow(0 0 0px rgba(0, 0, 0, 0))' },
-              hover: { 
-                scale: 1.15, 
-                filter: activeTab === 'alarm' 
-                  ? 'drop-shadow(0 0 4px rgba(0, 0, 0, 0.15))' 
-                  : 'drop-shadow(0 0 8px rgba(255, 255, 255, 0.45))'
-              }
-            }}
-            transition={{ type: 'spring', stiffness: 350, damping: 15 }}
-            className="flex items-center justify-center"
-          >
-            <Bell className="w-4.5 h-4.5" />
-          </motion.div>
-          <span className="text-[10px] font-bold">Alarms</span>
-        </motion.button>
- 
-        <motion.button
-          initial="rest"
-          whileHover="hover"
-          whileTap="tap"
+          icon={<Bell className="w-4.5 h-4.5" />}
+        />
+
+        <DockButton
+          isActive={activeTab === 'clock'}
           onClick={() => handleTabChange('clock')}
-          className={`relative flex-1 flex flex-col items-center justify-center py-2.5 rounded-xl transition-all gap-1 cursor-pointer z-10 ${
-            activeTab === 'clock'
-              ? 'text-slate-950 font-bold'
-              : 'text-slate-400 hover:text-white'
-          }`}
+          label="World"
+          intensity={settings.animationIntensity}
           id="dock-clock-btn"
-        >
-          {activeTab === 'clock' && (
-            <motion.div
-              layoutId="activeTabBackground"
-              className="absolute inset-0 bg-slate-100 rounded-xl -z-10"
-              transition={{ type: 'spring', stiffness: 300, damping: 25, mass: 0.7 }}
-            />
-          )}
-          <motion.div
-            variants={{
-              rest: { scale: 1, filter: 'drop-shadow(0 0 0px rgba(0, 0, 0, 0))' },
-              hover: { 
-                scale: 1.15, 
-                filter: activeTab === 'clock' 
-                  ? 'drop-shadow(0 0 4px rgba(0, 0, 0, 0.15))' 
-                  : 'drop-shadow(0 0 8px rgba(255, 255, 255, 0.45))'
-              }
-            }}
-            transition={{ type: 'spring', stiffness: 350, damping: 15 }}
-            className="flex items-center justify-center"
-          >
-            <ClockIcon className="w-4.5 h-4.5" />
-          </motion.div>
-          <span className="text-[10px] font-bold">World</span>
-        </motion.button>
+          icon={<ClockIcon className="w-4.5 h-4.5" />}
+        />
 
-
-        <motion.button
-          initial="rest"
-          whileHover="hover"
-          whileTap="tap"
+        <DockButton
+          isActive={activeTab === 'stopwatch'}
           onClick={() => handleTabChange('stopwatch')}
-          className={`relative flex-1 flex flex-col items-center justify-center py-2.5 rounded-xl transition-all gap-1 cursor-pointer z-10 ${
-            activeTab === 'stopwatch'
-              ? 'text-slate-950 font-bold'
-              : 'text-slate-400 hover:text-white'
-          }`}
+          label="Stopwatch"
+          intensity={settings.animationIntensity}
           id="dock-stopwatch-btn"
-        >
-          {activeTab === 'stopwatch' && (
-            <motion.div
-              layoutId="activeTabBackground"
-              className="absolute inset-0 bg-slate-100 rounded-xl -z-10"
-              transition={{ type: 'spring', stiffness: 300, damping: 25, mass: 0.7 }}
-            />
-          )}
-          <motion.div
-            variants={{
-              rest: { scale: 1, filter: 'drop-shadow(0 0 0px rgba(0, 0, 0, 0))' },
-              hover: { 
-                scale: 1.15, 
-                filter: activeTab === 'stopwatch' 
-                  ? 'drop-shadow(0 0 4px rgba(0, 0, 0, 0.15))' 
-                  : 'drop-shadow(0 0 8px rgba(255, 255, 255, 0.45))'
-              }
-            }}
-            transition={{ type: 'spring', stiffness: 350, damping: 15 }}
-            className="flex items-center justify-center"
-          >
-            <StopwatchIcon className="w-4.5 h-4.5" />
-          </motion.div>
-          <span className="text-[10px] font-bold">Stopwatch</span>
-        </motion.button>
- 
-        <motion.button
-          initial="rest"
-          whileHover="hover"
-          whileTap="tap"
+          icon={<StopwatchIcon className="w-4.5 h-4.5" />}
+        />
+
+        <DockButton
+          isActive={activeTab === 'timer'}
           onClick={() => handleTabChange('timer')}
-          className={`relative flex-1 flex flex-col items-center justify-center py-2.5 rounded-xl transition-all gap-1 cursor-pointer z-10 ${
-            activeTab === 'timer'
-              ? 'text-slate-950 font-bold'
-              : 'text-slate-400 hover:text-white'
-          }`}
+          label="Timer"
+          intensity={settings.animationIntensity}
           id="dock-timer-btn"
-        >
-          {activeTab === 'timer' && (
-            <motion.div
-              layoutId="activeTabBackground"
-              className="absolute inset-0 bg-slate-100 rounded-xl -z-10"
-              transition={{ type: 'spring', stiffness: 300, damping: 25, mass: 0.7 }}
-            />
-          )}
-          <motion.div
-            variants={{
-              rest: { scale: 1, filter: 'drop-shadow(0 0 0px rgba(0, 0, 0, 0))' },
-              hover: { 
-                scale: 1.15, 
-                filter: activeTab === 'timer' 
-                  ? 'drop-shadow(0 0 4px rgba(0, 0, 0, 0.15))' 
-                  : 'drop-shadow(0 0 8px rgba(255, 255, 255, 0.45))'
-              }
-            }}
-            transition={{ type: 'spring', stiffness: 350, damping: 15 }}
-            className="flex items-center justify-center"
-          >
-            <Hourglass className="w-4.5 h-4.5" />
-          </motion.div>
-          <span className="text-[10px] font-bold">Timer</span>
-        </motion.button>
- 
-        <motion.button
-          initial="rest"
-          whileHover="hover"
-          whileTap="tap"
+          icon={<Hourglass className="w-4.5 h-4.5" />}
+        />
+
+        <DockButton
+          isActive={activeTab === 'about'}
           onClick={() => handleTabChange('about')}
-          className={`relative flex-1 flex flex-col items-center justify-center py-2.5 rounded-xl transition-all gap-1 cursor-pointer z-10 ${
-            activeTab === 'about'
-              ? 'text-slate-950 font-bold'
-              : 'text-slate-400 hover:text-white'
-          }`}
+          label="About"
+          intensity={settings.animationIntensity}
           id="dock-about-btn"
-        >
-          {activeTab === 'about' && (
-            <motion.div
-              layoutId="activeTabBackground"
-              className="absolute inset-0 bg-slate-100 rounded-xl -z-10"
-              transition={{ type: 'spring', stiffness: 300, damping: 25, mass: 0.7 }}
-            />
-          )}
-          <motion.div
-            variants={{
-              rest: { scale: 1, filter: 'drop-shadow(0 0 0px rgba(0, 0, 0, 0))' },
-              hover: { 
-                scale: 1.15, 
-                filter: activeTab === 'about' 
-                  ? 'drop-shadow(0 0 4px rgba(250, 204, 21, 0.25))' 
-                  : 'drop-shadow(0 0 8px rgba(250, 204, 21, 0.65))'
-              }
-            }}
-            transition={{ type: 'spring', stiffness: 350, damping: 15 }}
-            className="flex items-center justify-center"
-          >
-            <Sparkles className="w-4.5 h-4.5 text-yellow-400" />
-          </motion.div>
-          <span className="text-[10px] font-bold">About</span>
-        </motion.button>
-      </nav>
+          icon={<Sparkles className="w-4.5 h-4.5 text-yellow-400" />}
+        />
+      </motion.nav>
 
       {/* Fullscreen Nightstand Bedside Mode Overlay */}
       <AnimatePresence>

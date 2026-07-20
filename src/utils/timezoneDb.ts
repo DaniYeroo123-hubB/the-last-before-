@@ -20,6 +20,11 @@ export const WORLD_CITIES: CityTimezone[] = [
   { cityName: 'Atlanta', country: 'United States', timezone: 'America/New_York' },
   { cityName: 'Honolulu', country: 'United States', timezone: 'Pacific/Honolulu' },
   { cityName: 'Anchorage', country: 'United States', timezone: 'America/Anchorage' },
+  { cityName: 'Juneau', country: 'United States', timezone: 'America/Juneau' },
+  { cityName: 'Halifax', country: 'Canada', timezone: 'America/Halifax' },
+  { cityName: 'Edmonton', country: 'Canada', timezone: 'America/Edmonton' },
+  { cityName: 'Winnipeg', country: 'Canada', timezone: 'America/Winnipeg' },
+  { cityName: 'St. John\'s', country: 'Canada', timezone: 'America/St_Johns' },
   { cityName: 'Toronto', country: 'Canada', timezone: 'America/Toronto' },
   { cityName: 'Vancouver', country: 'Canada', timezone: 'America/Vancouver' },
   { cityName: 'Montreal', country: 'Canada', timezone: 'America/Montreal' },
@@ -33,11 +38,24 @@ export const WORLD_CITIES: CityTimezone[] = [
   { cityName: 'Kingston', country: 'Jamaica', timezone: 'America/Kingston' },
   { cityName: 'Santo Domingo', country: 'Dominican Republic', timezone: 'America/Santo_Domingo' },
   { cityName: 'Guatemala City', country: 'Guatemala', timezone: 'America/Guatemala' },
+  { cityName: 'Belmopan', country: 'Belize', timezone: 'America/Belmopan' },
+  { cityName: 'Tegucigalpa', country: 'Honduras', timezone: 'America/Tegucigalpa' },
+  { cityName: 'San Salvador', country: 'El Salvador', timezone: 'America/El_Salvador' },
+  { cityName: 'Managua', country: 'Nicaragua', timezone: 'America/Managua' },
+  { cityName: 'Nassau', country: 'Bahamas', timezone: 'America/Nassau' },
+  { cityName: 'San Juan', country: 'Puerto Rico', timezone: 'America/San_Juan' },
+  { cityName: 'Bridgetown', country: 'Barbados', timezone: 'America/Barbados' },
+  { cityName: 'Port of Spain', country: 'Trinidad and Tobago', timezone: 'America/Port_of_Spain' },
+  { cityName: 'Willemstad', country: 'Curacao', timezone: 'America/Curacao' },
+  { cityName: 'George Town', country: 'Cayman Islands', timezone: 'America/Cayman' },
+  { cityName: 'Nuuk', country: 'Greenland', timezone: 'America/Nuuk' },
 
   // --- SOUTH AMERICA ---
   { cityName: 'São Paulo', country: 'Brazil', timezone: 'America/Sao_Paulo' },
   { cityName: 'Rio de Janeiro', country: 'Brazil', timezone: 'America/Sao_Paulo' },
   { cityName: 'Brasilia', country: 'Brazil', timezone: 'America/Sao_Paulo' },
+  { cityName: 'Manaus', country: 'Brazil', timezone: 'America/Manaus' },
+  { cityName: 'Recife', country: 'Brazil', timezone: 'America/Recife' },
   { cityName: 'Buenos Aires', country: 'Argentina', timezone: 'America/Argentina/Buenos_Aires' },
   { cityName: 'Santiago', country: 'Chile', timezone: 'America/Santiago' },
   { cityName: 'Bogota', country: 'Colombia', timezone: 'America/Bogota' },
@@ -47,6 +65,14 @@ export const WORLD_CITIES: CityTimezone[] = [
   { cityName: 'Montevideo', country: 'Uruguay', timezone: 'America/Montevideo' },
   { cityName: 'La Paz', country: 'Bolivia', timezone: 'America/La_Paz' },
   { cityName: 'Asuncion', country: 'Paraguay', timezone: 'America/Asuncion' },
+  { cityName: 'Georgetown', country: 'Guyana', timezone: 'America/Georgetown' },
+  { cityName: 'Paramaribo', country: 'Suriname', timezone: 'America/Paramaribo' },
+
+  // --- ATLANTIC & ISLANDS ---
+  { cityName: 'Stanley', country: 'Falkland Islands', timezone: 'Atlantic/Stanley' },
+  { cityName: 'Bermuda', country: 'United Kingdom', timezone: 'Atlantic/Bermuda' },
+  { cityName: 'Azores', country: 'Portugal', timezone: 'Atlantic/Azores' },
+  { cityName: 'Cape Verde', country: 'Cape Verde', timezone: 'Atlantic/Cape_Verde' },
 
   // --- EUROPE ---
   { cityName: 'London', country: 'United Kingdom', timezone: 'Europe/London' },
@@ -87,6 +113,8 @@ export const WORLD_CITIES: CityTimezone[] = [
   { cityName: 'Reykjavik', country: 'Iceland', timezone: 'Atlantic/Reykjavik' },
   { cityName: 'Monaco', country: 'Monaco', timezone: 'Europe/Monaco' },
   { cityName: 'Istanbul', country: 'Turkey', timezone: 'Europe/Istanbul' },
+  { cityName: 'Minsk', country: 'Belarus', timezone: 'Europe/Minsk' },
+  { cityName: 'Chisinau', country: 'Moldova', timezone: 'Europe/Chisinau' },
 
   // --- AFRICA ---
   { cityName: 'Addis Ababa', country: 'Ethiopia', timezone: 'Africa/Addis_Ababa' },
@@ -113,6 +141,8 @@ export const WORLD_CITIES: CityTimezone[] = [
   { cityName: 'Khartoum', country: 'Sudan', timezone: 'Africa/Khartoum' },
   { cityName: 'Kampala', country: 'Uganda', timezone: 'Africa/Kampala' },
   { cityName: 'Kigali', country: 'Rwanda', timezone: 'Africa/Kigali' },
+  { cityName: 'Port Louis', country: 'Mauritius', timezone: 'Indian/Mauritius' },
+  { cityName: 'Mahe', country: 'Seychelles', timezone: 'Indian/Mahe' },
 
   // --- MIDDLE EAST ---
   { cityName: 'Dubai', country: 'United Arab Emirates', timezone: 'Asia/Dubai' },
@@ -120,6 +150,7 @@ export const WORLD_CITIES: CityTimezone[] = [
   { cityName: 'Doha', country: 'Qatar', timezone: 'Asia/Qatar' },
   { cityName: 'Riyadh', country: 'Saudi Arabia', timezone: 'Asia/Riyadh' },
   { cityName: 'Jeddah', country: 'Saudi Arabia', timezone: 'Asia/Riyadh' },
+  { cityName: 'Sanaa', country: 'Yemen', timezone: 'Asia/Sanaa' },
   { cityName: 'Manama', country: 'Bahrain', timezone: 'Asia/Bahrain' },
   { cityName: 'Kuwait City', country: 'Kuwait', timezone: 'Asia/Kuwait' },
   { cityName: 'Muscat', country: 'Oman', timezone: 'Asia/Muscat' },
@@ -130,6 +161,7 @@ export const WORLD_CITIES: CityTimezone[] = [
   { cityName: 'Damascus', country: 'Syria', timezone: 'Asia/Damascus' },
   { cityName: 'Tel Aviv', country: 'Israel', timezone: 'Asia/Jerusalem' },
   { cityName: 'Jerusalem', country: 'Israel', timezone: 'Asia/Jerusalem' },
+  { cityName: 'Nicosia', country: 'Cyprus', timezone: 'Asia/Nicosia' },
 
   // --- ASIA ---
   { cityName: 'Tokyo', country: 'Japan', timezone: 'Asia/Tokyo' },
@@ -153,6 +185,7 @@ export const WORLD_CITIES: CityTimezone[] = [
   { cityName: 'Kathmandu', country: 'Nepal', timezone: 'Asia/Kathmandu' },
   { cityName: 'Colombo', country: 'Sri Lanka', timezone: 'Asia/Colombo' },
   { cityName: 'Dhaka', country: 'Bangladesh', timezone: 'Asia/Dhaka' },
+  { cityName: 'Thimphu', country: 'Bhutan', timezone: 'Asia/Thimphu' },
   { cityName: 'Karachi', country: 'Pakistan', timezone: 'Asia/Karachi' },
   { cityName: 'Lahore', country: 'Pakistan', timezone: 'Asia/Karachi' },
   { cityName: 'Islamabad', country: 'Pakistan', timezone: 'Asia/Karachi' },
@@ -170,6 +203,18 @@ export const WORLD_CITIES: CityTimezone[] = [
   { cityName: 'Baku', country: 'Azerbaijan', timezone: 'Asia/Baku' },
   { cityName: 'Yerevan', country: 'Armenia', timezone: 'Asia/Yerevan' },
   { cityName: 'Tbilisi', country: 'Georgia', timezone: 'Asia/Tbilisi' },
+  { cityName: 'Kabul', country: 'Afghanistan', timezone: 'Asia/Kabul' },
+  { cityName: 'Pyongyang', country: 'North Korea', timezone: 'Asia/Pyongyang' },
+  { cityName: 'Vladivostok', country: 'Russia', timezone: 'Asia/Vladivostok' },
+  { cityName: 'Yakutsk', country: 'Russia', timezone: 'Asia/Yakutsk' },
+  { cityName: 'Irkutsk', country: 'Russia', timezone: 'Asia/Irkutsk' },
+  { cityName: 'Krasnoyarsk', country: 'Russia', timezone: 'Asia/Krasnoyarsk' },
+  { cityName: 'Novosibirsk', country: 'Russia', timezone: 'Asia/Novosibirsk' },
+  { cityName: 'Omsk', country: 'Russia', timezone: 'Asia/Omsk' },
+  { cityName: 'Yekaterinburg', country: 'Russia', timezone: 'Asia/Yekaterinburg' },
+  { cityName: 'Samara', country: 'Russia', timezone: 'Asia/Samara' },
+  { cityName: 'Male', country: 'Maldives', timezone: 'Indian/Maldives' },
+  { cityName: 'Macau', country: 'Macau', timezone: 'Asia/Macau' },
 
   // --- OCEANIA ---
   { cityName: 'Sydney', country: 'Australia', timezone: 'Australia/Sydney' },
@@ -177,10 +222,100 @@ export const WORLD_CITIES: CityTimezone[] = [
   { cityName: 'Brisbane', country: 'Australia', timezone: 'Australia/Brisbane' },
   { cityName: 'Perth', country: 'Australia', timezone: 'Australia/Perth' },
   { cityName: 'Adelaide', country: 'Australia', timezone: 'Australia/Adelaide' },
+  { cityName: 'Darwin', country: 'Australia', timezone: 'Australia/Darwin' },
+  { cityName: 'Hobart', country: 'Australia', timezone: 'Australia/Hobart' },
   { cityName: 'Auckland', country: 'New Zealand', timezone: 'Pacific/Auckland' },
   { cityName: 'Wellington', country: 'New Zealand', timezone: 'Pacific/Auckland' },
   { cityName: 'Fiji', country: 'Fiji', timezone: 'Pacific/Fiji' },
-  { cityName: 'Port Moresby', country: 'Papua New Guinea', timezone: 'Pacific/Port_Moresby' }
+  { cityName: 'Port Moresby', country: 'Papua New Guinea', timezone: 'Pacific/Port_Moresby' },
+  { cityName: 'Pago Pago', country: 'American Samoa', timezone: 'Pacific/Pago_Pago' },
+  { cityName: 'Noumea', country: 'New Caledonia', timezone: 'Pacific/Noumea' },
+  { cityName: 'Apia', country: 'Samoa', timezone: 'Pacific/Apia' },
+  { cityName: 'Port Vila', country: 'Vanuatu', timezone: 'Pacific/Efate' },
+  { cityName: 'Papeete', country: 'French Polynesia', timezone: 'Pacific/Tahiti' },
+  { cityName: 'Honiara', country: 'Solomon Islands', timezone: 'Pacific/Guadalcanal' },
+  { cityName: 'Tarawa', country: 'Kiribati', timezone: 'Pacific/Tarawa' },
+  { cityName: 'Funafuti', country: 'Tuvalu', timezone: 'Pacific/Funafuti' },
+  { cityName: 'Majuro', country: 'Marshall Islands', timezone: 'Pacific/Majuro' },
+  { cityName: 'Palikir', country: 'Micronesia', timezone: 'Pacific/Pohnpei' },
+  { cityName: 'Koror', country: 'Palau', timezone: 'Pacific/Palau' },
+  { cityName: 'Saipan', country: 'Northern Mariana Islands', timezone: 'Pacific/Saipan' },
+  { cityName: 'Guam', country: 'Guam', timezone: 'Pacific/Guam' }
 ];
 
 export const ALL_IANA_TIMEZONES = Array.from(new Set(WORLD_CITIES.map(c => c.timezone))).sort();
+
+export interface DSTInfo {
+  hasDST: boolean;
+  isDSTNow: boolean;
+  abbreviation: string;
+  offsetLabel: string;
+}
+
+/**
+ * Dynamically evaluates the Daylight Saving Time status, standard/daylight abbreviation, 
+ * and UTC offset of any standard IANA timezone without requiring network resources.
+ */
+export function getDSTDetails(timezone: string, date: Date = new Date()): DSTInfo {
+  try {
+    // 1. Get current dynamic short abbreviation
+    const formatterShort = new Intl.DateTimeFormat('en-US', {
+      timeZone: timezone,
+      timeZoneName: 'short',
+    });
+    const partsShort = formatterShort.formatToParts(date);
+    const abbreviation = partsShort.find(p => p.type === 'timeZoneName')?.value || 'GMT';
+
+    // 2. Compute DST by comparing January (winter) and July (summer) offsets
+    const currentYear = date.getFullYear();
+    const jan = new Date(currentYear, 0, 1);
+    const jul = new Date(currentYear, 6, 1);
+
+    const formatterJan = new Intl.DateTimeFormat('en-US', { timeZone: timezone, timeZoneName: 'longOffset' });
+    const formatterJul = new Intl.DateTimeFormat('en-US', { timeZone: timezone, timeZoneName: 'longOffset' });
+
+    const janOffsetStr = formatterJan.formatToParts(jan).find(p => p.type === 'timeZoneName')?.value || '';
+    const julOffsetStr = formatterJul.formatToParts(jul).find(p => p.type === 'timeZoneName')?.value || '';
+
+    const hasDST = janOffsetStr !== julOffsetStr;
+
+    // Is active now? Compare parsed numeric offsets
+    const currentOffsetStr = new Intl.DateTimeFormat('en-US', { timeZone: timezone, timeZoneName: 'longOffset' })
+      .formatToParts(date)
+      .find(p => p.type === 'timeZoneName')?.value || 'GMT+00:00';
+
+    const parseOffsetVal = (str: string): number => {
+      const match = str.match(/GMT([+-])(\d+):?(\d+)?/);
+      if (!match) return 0;
+      const sign = match[1] === '+' ? 1 : -1;
+      const hours = parseInt(match[2], 10);
+      const minutes = match[3] ? parseInt(match[3], 10) : 0;
+      return sign * (hours * 60 + minutes);
+    };
+
+    const janOffsetMin = parseOffsetVal(janOffsetStr);
+    const julOffsetMin = parseOffsetVal(julOffsetStr);
+    const currentOffsetMin = parseOffsetVal(currentOffsetStr);
+
+    let isDSTNow = false;
+    if (hasDST) {
+      // Typically the larger offset is DST
+      const maxOffset = Math.max(janOffsetMin, julOffsetMin);
+      isDSTNow = currentOffsetMin === maxOffset;
+    }
+
+    return {
+      hasDST,
+      isDSTNow,
+      abbreviation,
+      offsetLabel: currentOffsetStr,
+    };
+  } catch (e) {
+    return {
+      hasDST: false,
+      isDSTNow: false,
+      abbreviation: 'GMT',
+      offsetLabel: 'GMT+00:00',
+    };
+  }
+}

@@ -25,40 +25,48 @@ import {
 import { motion } from 'motion/react';
 import haptics from '../utils/haptics';
 import synth from '../utils/synth';
+const foundersPhoto = new URL(
+  './photo_5963147175640370457_y.jpg',
+  import.meta.url
+).href;
 
-const foundersPhoto = new URL('../assets/images/founders_photo_custom.jpg', import.meta.url).href;
+import { useDateTimeSettings } from '../utils/settingsContext';
+import { getStaggerContainerVariants, getStaggerItemVariants, getButtonMotion } from '../utils/motion';
+
 interface AboutTabProps {
   theme: Theme;
 }
 
 export default function AboutTab({ theme }: AboutTabProps) {
-  // Animation presets for staggering
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.12,
-        delayChildren: 0.05
-      }
-    }
-  };
+  const { settings } = useDateTimeSettings();
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 25 },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      transition: { type: "spring", stiffness: 90, damping: 14 }
-    }
-  };
+  // Dynamically generated presets from the centralized motion system
+  const containerVariants = getStaggerContainerVariants(settings.animationIntensity, 0.08);
+  const itemVariants = getStaggerItemVariants(settings.animationIntensity);
 
+  // High-fidelity card hover physics with automatic fallbacks for minimal/balanced intensity
   const cardHover = {
-    hover: { 
-      y: -6, 
-      boxShadow: "0 20px 40px -15px rgba(0,0,0,0.5)",
-      borderColor: "rgba(255,255,255,0.2)",
-      transition: { duration: 0.25, ease: "easeOut" }
+    hover: settings.animationIntensity === 'minimal' ? {
+      scale: 1.01,
+      transition: { duration: 0.15 }
+    } : settings.animationIntensity === 'balanced' ? {
+      y: -3,
+      scale: 1.02,
+      borderColor: "rgba(255,255,255,0.12)",
+      transition: { duration: 0.2 }
+    } : settings.animationIntensity === 'supreme' ? {
+      y: -6,
+      scale: 1.03,
+      boxShadow: "0 20px 40px -15px rgba(0,0,0,0.6)",
+      borderColor: "rgba(255,255,255,0.22)",
+      transition: { type: "spring", stiffness: 200, damping: 15 }
+    } : {
+      // Cinematic - extremely physical slow deep float
+      y: -10,
+      scale: 1.04,
+      boxShadow: "0 32px 64px -20px rgba(0,0,0,0.7)",
+      borderColor: "rgba(255,255,255,0.3)",
+      transition: { type: "spring", stiffness: 80, damping: 14 }
     }
   };
 
@@ -143,7 +151,13 @@ export default function AboutTab({ theme }: AboutTabProps) {
   };
 
   return (
-    <div className="w-full max-w-3xl mx-auto space-y-16 pb-36 px-4" id="about-tab-wrapper">
+    <motion.div 
+      variants={containerVariants}
+      initial="initial"
+      animate="animate"
+      className="w-full max-w-3xl mx-auto space-y-16 pb-36 px-4" 
+      id="about-tab-wrapper"
+    >
       
       {/* 1. LUXURIOUS HERO SECTION */}
       <motion.div 
@@ -551,6 +565,6 @@ export default function AboutTab({ theme }: AboutTabProps) {
         </p>
       </motion.footer>
 
-    </div>
+    </motion.div>
   );
 }
