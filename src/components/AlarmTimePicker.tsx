@@ -21,6 +21,67 @@ export default function AlarmTimePicker({ value, onChange, theme }: AlarmTimePic
   const isDraggingRef = useRef(false);
   const clockFaceRef = useRef<HTMLDivElement>(null);
   const lastSentValueRef = useRef<string>('');
+  const hourBtnRef = useRef<HTMLButtonElement>(null);
+  const minuteBtnRef = useRef<HTMLButtonElement>(null);
+
+  // Synchronize focus dynamically on keyboard or mode switch
+  useEffect(() => {
+    if (mode === 'hours') {
+      hourBtnRef.current?.focus({ preventScroll: true });
+    } else {
+      minuteBtnRef.current?.focus({ preventScroll: true });
+    }
+  }, [mode]);
+
+  const updateTime = (h: number, m: number, p: 'AM' | 'PM') => {
+    let h24 = h % 12;
+    if (p === 'PM') h24 += 12;
+    
+    const hrsStr = String(h24).padStart(2, '0');
+    const minsStr = String(m).padStart(2, '0');
+    const newValue = `${hrsStr}:${minsStr}`;
+    lastSentValueRef.current = newValue;
+    onChange(newValue);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>, targetMode: 'hours' | 'minutes') => {
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      haptics.tick();
+      synth.playSlider();
+      if (targetMode === 'hours') {
+        let nextH = hour + 1;
+        if (nextH > 12) nextH = 1;
+        setHour(nextH);
+        updateTime(nextH, minute, period);
+      } else {
+        let nextM = minute + 1;
+        if (nextM > 59) nextM = 0;
+        setMinute(nextM);
+        updateTime(hour, nextM, period);
+      }
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      haptics.tick();
+      synth.playSlider();
+      if (targetMode === 'hours') {
+        let nextH = hour - 1;
+        if (nextH < 1) nextH = 12;
+        setHour(nextH);
+        updateTime(nextH, minute, period);
+      } else {
+        let nextM = minute - 1;
+        if (nextM < 0) nextM = 59;
+        setMinute(nextM);
+        updateTime(hour, nextM, period);
+      }
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+      e.preventDefault();
+      haptics.light();
+      synth.playClick();
+      setMode(targetMode === 'hours' ? 'minutes' : 'hours');
+    }
+  };
 
   // Sync internal state with external value prop on initialization and updates
   useEffect(() => {
@@ -41,17 +102,6 @@ export default function AlarmTimePicker({ value, onChange, theme }: AlarmTimePic
       }
     }
   }, [value]);
-
-  const updateTime = (h: number, m: number, p: 'AM' | 'PM') => {
-    let h24 = h % 12;
-    if (p === 'PM') h24 += 12;
-    
-    const hrsStr = String(h24).padStart(2, '0');
-    const minsStr = String(m).padStart(2, '0');
-    const newValue = `${hrsStr}:${minsStr}`;
-    lastSentValueRef.current = newValue;
-    onChange(newValue);
-  };
 
   const updateValueFromPointer = (clientX: number, clientY: number) => {
     if (!clockFaceRef.current) return;
@@ -165,32 +215,36 @@ export default function AlarmTimePicker({ value, onChange, theme }: AlarmTimePic
         <div className="flex items-center bg-black/40 border border-slate-900/50 p-1.5 rounded-2xl shadow-inner">
           {/* HOUR SELECTOR TAB */}
           <button
+            ref={hourBtnRef}
             type="button"
             onClick={() => {
               haptics.light();
               synth.playClick();
               setMode('hours');
             }}
-            className={`text-5xl font-extrabold tracking-tight px-4 py-2 rounded-xl transition-all duration-300 cursor-pointer ${
+            onKeyDown={(e) => handleKeyDown(e, 'hours')}
+            className={`text-5xl font-extrabold tracking-tight px-4 py-2 rounded-xl transition-all duration-300 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 focus-visible:ring-${theme.primary} ${
               mode === 'hours'
                 ? `text-${theme.primary} bg-${theme.primary}/10 border border-${theme.primary}/20 shadow-[0_0_12px_rgba(var(--theme-primary-rgb,34,211,238),0.15)]`
                 : 'text-slate-500 hover:text-slate-300 border border-transparent'
             }`}
           >
-            {String(hour).padStart(2, '0')}
+            {hour}
           </button>
 
           <span className="text-3xl font-extrabold text-slate-700 mx-1.5 animate-pulse">:</span>
 
           {/* MINUTE SELECTOR TAB */}
           <button
+            ref={minuteBtnRef}
             type="button"
             onClick={() => {
               haptics.light();
               synth.playClick();
               setMode('minutes');
             }}
-            className={`text-5xl font-extrabold tracking-tight px-4 py-2 rounded-xl transition-all duration-300 cursor-pointer ${
+            onKeyDown={(e) => handleKeyDown(e, 'minutes')}
+            className={`text-5xl font-extrabold tracking-tight px-4 py-2 rounded-xl transition-all duration-300 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 focus-visible:ring-${theme.primary} ${
               mode === 'minutes'
                 ? `text-${theme.primary} bg-${theme.primary}/10 border border-${theme.primary}/20 shadow-[0_0_12px_rgba(var(--theme-primary-rgb,34,211,238),0.15)]`
                 : 'text-slate-500 hover:text-slate-300 border border-transparent'
@@ -217,8 +271,22 @@ export default function AlarmTimePicker({ value, onChange, theme }: AlarmTimePic
                     updateTime(hour, minute, p);
                   }
                 }}
-                className={`relative px-3.5 py-1.5 rounded-xl text-[10px] font-black tracking-wider transition-colors duration-300 cursor-pointer min-h-[32px] flex items-center justify-center outline-none ${
-                  isSelected ? 'text-black font-black' : 'text-slate-400 hover:text-slate-200'
+                onKeyDown={(e) => {
+                  if (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === ' ') {
+                    e.preventDefault();
+                    setIsPeriodManuallySet(true);
+                    const nextP = period === 'AM' ? 'PM' : 'AM';
+                    haptics.medium();
+                    synth.playSwitch(nextP === 'AM');
+                    setPeriod(nextP);
+                    updateTime(hour, minute, nextP);
+                  } else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    setMode(mode === 'hours' ? 'minutes' : 'hours');
+                  }
+                }}
+                className={`relative px-3.5 py-1.5 rounded-xl text-[10px] font-black tracking-wider transition-colors duration-300 cursor-pointer min-h-[32px] flex items-center justify-center outline-none focus-visible:ring-2 focus-visible:ring-${theme.primary} ${
+                  isSelected ? 'text-slate-950 font-black' : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
                 {isSelected && (
